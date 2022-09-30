@@ -5,7 +5,6 @@ pthread_mutex_t lock;
 int take_left_fork(philo_list *lst, int index)
 {
 	struct timeval current_time;
-	gettimeofday(&current_time, NULL);
 	while (lst->index != index)
 		lst = lst->next;
 	while (!lst->left_fork)
@@ -15,8 +14,9 @@ int take_left_fork(philo_list *lst, int index)
 	}
 	if (lst->left_fork)
 	{
+		gettimeofday(&current_time, NULL);
+		printf("%ld %ld %d has taken left fork\n", current_time.tv_sec, current_time.tv_usec, index);
 		pthread_mutex_lock(&lock);
-		printf("%ld %d has taken left fork\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), index);
 		lst->previous->right_fork = 0;
 		lst->left_fork = 0;
 		pthread_mutex_unlock(&lock);
@@ -27,7 +27,6 @@ int take_left_fork(philo_list *lst, int index)
 int take_right_fork(philo_list *lst, int index)
 {
 	struct timeval current_time;
-	gettimeofday(&current_time, NULL);
 	while (lst->index != index)
 		lst = lst->next;
 	while (!lst->right_fork)
@@ -37,8 +36,9 @@ int take_right_fork(philo_list *lst, int index)
 	}
 	if (lst->right_fork)
 	{	
+		gettimeofday(&current_time, NULL);
+		printf("%ld %ld %d has taken right fork\n", current_time.tv_sec, current_time.tv_usec, index);
 		pthread_mutex_lock(&lock);
-		printf("%ld %d has taken right fork\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), index);
 		lst->next->left_fork = 0;
 		lst->right_fork = 0;
 		pthread_mutex_unlock(&lock);
@@ -70,25 +70,26 @@ void routine(struct philo_data *philo)
 	int left_fork;
 	int right_fork;
 	struct timeval current_time;
+	long time;
 
 	left_fork = take_left_fork(philo->fork_table, philo->index);
 	right_fork = take_right_fork(philo->fork_table, philo->index);
 	if (left_fork == 1 && right_fork == 1)
 	{
 		gettimeofday(&current_time, NULL);
-		printf("%ld %d is eating\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
+		printf("%ld %ld %d is eating\n", current_time.tv_sec, current_time.tv_usec, philo->index);
 		(*philo).last_eat_time = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
 		sleep(3);
 		gettimeofday(&current_time, NULL);
-		printf("%ld %d is sleeping\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
-		// printf("%ld %d droped is forks\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
+		printf("%ld %ld %d is sleeping\n", current_time.tv_sec, current_time.tv_usec, philo->index);
 		pthread_mutex_lock(&lock);
 		drop_left_fork(philo->fork_table, philo->index);
 		drop_right_fork(philo->fork_table, philo->index);
 		pthread_mutex_unlock(&lock);
 		sleep(3);
 		gettimeofday(&current_time, NULL);
-		printf("%ld %d is thinking\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
+		printf("%ld %ld %d is thinking\n", current_time.tv_sec, current_time.tv_usec, philo->index);
+		// printf("%ld %ld %d droped is forks\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
 	}
 }
 
