@@ -2,11 +2,55 @@
 
 pthread_mutex_t lock;
 
+int take_left_fork(philo_list *lst, int index)
+{
+	struct timeval current_time;
+	gettimeofday(&current_time, NULL);
+	while (lst->index != index)
+		lst = lst->next;
+	while (!lst->left_fork)
+	{
+		if (lst->left_fork)
+			break;
+	}
+	if (lst->left_fork)
+	{
+		pthread_mutex_lock(&lock);
+		printf("%ld %d has taken left fork\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), index);
+		lst->previous->right_fork = 0;
+		lst->left_fork = 0;
+		pthread_mutex_unlock(&lock);
+		return 1;
+	}
+}
+
+int take_right_fork(philo_list *lst, int index)
+{
+	struct timeval current_time;
+	gettimeofday(&current_time, NULL);
+	while (lst->index != index)
+		lst = lst->next;
+	while (!lst->right_fork)
+	{
+		if (lst->right_fork)
+			break;
+	}
+	if (lst->right_fork)
+	{	
+		pthread_mutex_lock(&lock);
+		printf("%ld %d has taken right fork\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), index);
+		lst->next->left_fork = 0;
+		lst->right_fork = 0;
+		pthread_mutex_unlock(&lock);
+		return 1;
+	}
+}
+
 int	check_can_eat(philo_list *lst, int index)
 {
 	while (lst->index != index)
 		lst = lst->next;
-	if (lst->left && lst->right)
+	if (lst->left_fork && lst->right_fork)
 		return (1);
 	return (0);
 }
@@ -15,51 +59,83 @@ void	set_eat(philo_list *lst, int index)
 {
 	while (lst->index != index)
 		lst = lst->next;
-	lst->left = 0;
-	lst->right = 0;
-	lst->previous->right = 0;
-	lst->next->left = 0;
+	lst->left_fork = 0;
+	lst->right_fork = 0;
+	lst->previous->right_fork = 0;
+	lst->next->left_fork = 0;
 }
 
-void	*function(void *p)
+void routine(struct philo_data *philo)
 {
-	struct philo_data philo = *(struct philo_data *)p;
-	if (philo.index % 2 == 1)
-		usleep(100000);
-	// printf("IS %d PAIR=%d\n", philo.index, philo.index % 2);
-	pthread_mutex_lock(&lock);
-	if (check_can_eat(philo.philo_list, philo.index))
+	int left_fork;
+	int right_fork;
+	struct timeval current_time;
+
+	left_fork = take_left_fork(philo->fork_table, philo->index);
+	right_fork = take_right_fork(philo->fork_table, philo->index);
+	if (left_fork == 1 && right_fork == 1)
 	{
-		set_eat(philo.philo_list, philo.index);
-		struct timeval current_time;
 		gettimeofday(&current_time, NULL);
-		printf("%ld:%ld: SET %d TO EAT\n",
-				current_time.tv_sec % 60,
-				current_time.tv_usec / 10000, philo.index);
+		printf("%ld %d is eating\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
+		(*philo).last_eat_time = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
+		sleep(3);
+		gettimeofday(&current_time, NULL);
+		printf("%ld %d is sleeping\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
+		// printf("%ld %d droped is forks\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
+		pthread_mutex_lock(&lock);
+		drop_left_fork(philo->fork_table, philo->index);
+		drop_right_fork(philo->fork_table, philo->index);
+		pthread_mutex_unlock(&lock);
+		sleep(3);
+		gettimeofday(&current_time, NULL);
+		printf("%ld %d is thinking\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
 	}
-	pthread_mutex_unlock(&lock);
-	// printf("Im philo : %d Can i eat ? : %d\n", philo.index, check_can_eat(philo.philo_list ,philo.index));
-	//	while (1)
-	//	{
-	//		if (FOURCHETTE_LEFT && FOURCHETTE_RIGHT)
-	//		{
-	//			printf("timestamp_in_ms X has taken a fork\n");
-	//			printf("timestamp_in_ms X has taken a fork\n");
-	//			printf("timestamp_in_ms X is eating\n");
-	//			update eat time
-	//			usleep(time to eat)
-	//			printf("timestamp_in_ms X is sleeping\n");
-	//			usleep(time to sleep)
-	//			printf("timestamp_in_ms X is thinking\n");
-	//		}
-	//	}
+}
+
+void	*philo_thread_func(void *p)
+{
+	struct philo_data *philo = (struct philo_data *)p;
+	if ((*philo).index % 2 == 1)
+		usleep(100000);
+	while (1)
+	{
+		routine(philo);
+	}
+
+	return (NULL);
+}
+
+void	*philo_death_thread_func(void *p)
+{
+	struct philo_data *philo = (struct philo_data *)p;
+	long time_to_die = (philo[0]).data->time_to_die;
+	struct timeval current_time;
+	int i = 0;
+
+	while (1)
+	{
+		gettimeofday(&current_time, NULL);
+		while (i < (philo[0]).data->number_of_philosophers)
+		{
+			long hour_to_die = ((philo[i]).last_eat_time + time_to_die);
+			long current_hour = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
+			if (hour_to_die < current_hour)
+			{
+				printf("%ld <= %ld\n", hour_to_die, current_hour);
+				printf("%ld %d died ; last eat = %ld\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), (philo[i]).index, (philo[i]).last_eat_time);
+				// exit(0);
+			}
+			i++;
+		}
+		i = 0;
+	}
 	return (NULL);
 }
 
 void	get_data(t_data *data, char **argv)
 {
 	(*data).number_of_philosophers = atoi(argv[1]);
-	// (*data).time_to_die = atoi(argv[2]);
+	(*data).time_to_die = atoi(argv[2]);
 	// (*data).time_to_eat = atoi(argv[3]);
 	// (*data).time_to_sleep = atoi(argv[4]);
 	// if (argv[5])
@@ -80,12 +156,14 @@ void free_philo_list(philo_list *lst, int size)
 
 int	main(int argc, char **argv)
 {
-	pthread_t t[50];
+	pthread_t *philo_thread;
+	pthread_t philo_death_thread;
+	struct philo_data *philo_data;
 	t_data data;
 	int i;
-	struct philo_data *philo_data;
-
-	if (argc != 2 && argc != 5 && argc != 5)
+	struct timeval current_time;
+	
+	if (argc != 3 && argc != 5)
 	{
 		printf("Wrong inputs\n");
 		exit(1);
@@ -100,53 +178,60 @@ int	main(int argc, char **argv)
 	//-----------------------------------------//
 	get_data(&data, argv);
 
-	philo_list *fork_lst;
+	philo_list *fork_table;
 
-	fork_lst = NULL;
-	int j = 1;
-	while (j <= data.number_of_philosophers)
-		ft_lstadd_back(&fork_lst, ft_lstnew(j++));
-	ft_lstset_previous(fork_lst);
-	set_circular(fork_lst);
-	// printf("BEFORE=%d\n", check_can_eat(philos, 5));
-	// set_eat(philos, 5);
-	// printf("%d\n", check_can_eat(philos, 1));
-	// printf("%d\n", check_can_eat(philos, 2));
-	// printf("%d\n", check_can_eat(philos, 3));
-	// printf("%d\n", check_can_eat(philos, 4));
-	// printf("%d\n", check_can_eat(philos, 5));
-
-	//------------------------------------------//
-	//				Time stamp					//
-	//------------------------------------------//
-	// struct timeval current_time;
-	// gettimeofday(&current_time, NULL);
-	// printf("seconds : %ld micro seconds : %ld\n",
-	// 		current_time.tv_sec % 60,
-	// 		current_time.tv_usec / 10000);
+	fork_table = NULL;
+	i = 1;
+	while (i <= data.number_of_philosophers)
+		ft_lstadd_back(&fork_table, ft_lstnew(i++));
+	ft_lstset_previous(fork_table);
+	set_circular(fork_table);
 	//-----------------------------------------//
 	//					Thread					//
 	//-----------------------------------------//
+	philo_thread = malloc(data.number_of_philosophers * sizeof(pthread_t));
 	philo_data = malloc(data.number_of_philosophers * sizeof(struct philo_data));
 	i = 1;
+	gettimeofday(&current_time, NULL);
 	while (i <= data.number_of_philosophers)
 	{
-		philo_data[i - 1].philo_list = fork_lst;
+		philo_data[i - 1].fork_table = fork_table;
 		philo_data[i - 1].data = &data;
 		philo_data[i - 1].index = i;
-		pthread_create(&t[i - 1], NULL, function, &philo_data[i - 1]);
+		philo_data[i - 1].last_eat_time = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
+		pthread_create(&philo_thread[i - 1], NULL, philo_thread_func, &philo_data[i - 1]);
 		i++;
 	}
+	// pthread_create(&philo_death_thread, NULL, philo_death_thread_func, philo_data);
 	i = 1;
 	while (i <= data.number_of_philosophers)
 	{
-		pthread_join(t[i - 1], NULL);
+		pthread_join(philo_thread[i - 1], NULL);
 		i++;
 	}
+	// pthread_join(philo_death_thread, NULL);
 	//-----------------------------------------//
 	//				EXIT AND FREE				//
 	//-----------------------------------------//
-	free_philo_list(fork_lst, data.number_of_philosophers);
+	free_philo_list(fork_table, data.number_of_philosophers);
 	free(philo_data);
 	pthread_mutex_destroy(&lock);
+	// struct timeval current_time;
+	// long long total;
+	// while (1)
+	// {
+	// 	gettimeofday(&current_time, NULL);
+	// 	total = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
+	// 	// printf("%ld %ld\n", current_time.tv_sec, current_time.tv_usec);
+	// 	printf("%ld\n", total);
+	// 	if (current_time.tv_usec < 20)
+	// 	{
+	// 		gettimeofday(&current_time, NULL);
+	// 		total = (current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000;
+	// 		printf("%ld\n", total);
+	// 		printf("%ld %ld\n", current_time.tv_sec, current_time.tv_usec);
+	// 		break ;
+	// 	}
+
+	// }
 }

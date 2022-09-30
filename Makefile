@@ -5,7 +5,8 @@ OBJS_DIR = objs
 SRCSBONUS_DIR = srcs_bonus
 
 SRCS	=	philo.c \
-			get_table.c
+			get_table.c \
+			fork.c
 
 SRCS_BONUS =
 

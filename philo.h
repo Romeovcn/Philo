@@ -20,8 +20,8 @@ typedef struct s_data
 typedef struct s_list
 {
 	int				index;
-	int				left;
-	int				right;
+	int				left_fork;
+	int				right_fork;
 	struct s_list	*next;
 	struct s_list	*previous;
 }					philo_list;
@@ -29,14 +29,20 @@ typedef struct s_list
 typedef struct philo_data
 {
 	int				index;
+	long			last_eat_time;
 	t_data			*data;
-	philo_list		*philo_list;
+	philo_list		*fork_table;
 }					p_data;
-
+// Get table
 philo_list			*ft_lstnew(int index);
 philo_list			*ft_lstlast(philo_list *lst);
 void				ft_lstadd_back(philo_list **lst, philo_list *new);
 void				ft_lstset_previous(philo_list *lst);
 void				set_circular(philo_list *lst);
+// Fork
+int					take_left_fork(philo_list *lst, int index);
+int					take_right_fork(philo_list *lst, int index);
+void				drop_left_fork(philo_list *lst, int index);
+void				drop_right_fork(philo_list *lst, int index);
 
 #endif

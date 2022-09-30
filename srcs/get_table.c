@@ -8,8 +8,8 @@ philo_list	*ft_lstnew(int index)
 	if (!result)
 		return (0);
 	result->index = index;
-	result->left = 1;
-	result->right = 1;
+	result->left_fork = 1;
+	result->right_fork = 1;
 	result->next = NULL;
 	result->previous = NULL;
 	return (result);
