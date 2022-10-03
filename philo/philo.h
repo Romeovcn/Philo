@@ -1,6 +1,7 @@
 #ifndef PHILO_H
 # define PHILO_H
 
+# include <limits.h>
 # include <pthread.h>
 # include <stdio.h>
 # include <stdlib.h>
@@ -30,6 +31,7 @@ typedef struct philo_data
 {
 	int				index;
 	long			last_eat_time;
+	int				is_dead;
 	t_data			*data;
 	philo_list		*fork_table;
 }					p_data;
