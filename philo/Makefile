@@ -25,6 +25,7 @@ NAME_BONUS = pipex
 CC = gcc
 
 CFLAGS = -pthread
+# CFLAGS = -fsanitize=thread -pthread
 
 # -- RULES -- #
 

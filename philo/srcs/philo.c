@@ -1,52 +1,65 @@
 #include "philo.h"
 
-pthread_mutex_t lock;
+pthread_mutex_t lock_f;
 
-int take_left_fork(philo_list *lst, int index)
+pthread_mutex_t lock_d;
+
+pthread_mutex_t lock_eat;
+
+int	check_dead(int is_d)
+{
+	pthread_mutex_lock(&lock_d);
+    int result = is_d;
+ 	pthread_mutex_unlock(&lock_d);
+    return result;
+}
+
+int take_left_fork(philo_list *lst, int index, p_data *philo)
 {
 	struct timeval current_time;
 
 	while (lst->index != index)
 		lst = lst->next;
-	while (!lst->left_fork)
+	while (1)
 	{
-		if (lst->left_fork)
-			break;
-	}
-	if (lst->left_fork)
-	{
-		gettimeofday(&current_time, NULL);
-		printf("%ld %d has taken a fork\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), index);
-		pthread_mutex_lock(&lock);
-		lst->previous->right_fork = 0;
-		lst->left_fork = 0;
-		pthread_mutex_unlock(&lock);
-		return 1;
+		pthread_mutex_lock(&lock_f);
+		if (lst->left_fork && !check_dead(philo->is_dead))
+		{
+			gettimeofday(&current_time, NULL);
+			printf("%ld %d has taken a left fork\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), index);
+			lst->previous->right_fork = 0;
+			lst->left_fork = 0;
+			pthread_mutex_unlock(&lock_f);
+			return 1;
+		}
+		pthread_mutex_unlock(&lock_f);
+		usleep(1000);
 	}
 	return 0;
 }
 
-int take_right_fork(philo_list *lst, int index)
+int take_right_fork(philo_list *lst, int index, p_data *philo)
 {
 	struct timeval current_time;
 
 	while (lst->index != index)
 		lst = lst->next;
-	while (!lst->right_fork)
+	while (1)
 	{
-		if (lst->right_fork)
-			break;
+			pthread_mutex_lock(&lock_f);
+		if (lst->right_fork && !check_dead(philo->is_dead))
+		{
+			gettimeofday(&current_time, NULL);
+			printf("%ld %d has taken a right fork\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), index);
+			lst->next->left_fork = 0;
+			lst->right_fork = 0;
+			pthread_mutex_unlock(&lock_f);
+			return 1;
+		}
+		pthread_mutex_unlock(&lock_f);
+		usleep(1000);
 	}
-	if (lst->right_fork)
-	{	
-		gettimeofday(&current_time, NULL);
-		printf("%ld %d has taken a fork\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), index);
-		pthread_mutex_lock(&lock);
-		lst->next->left_fork = 0;
-		lst->right_fork = 0;
-		pthread_mutex_unlock(&lock);
-		return 1;
-	}
+	return 0;
 }
 
 void routine(struct philo_data *philo)
@@ -56,25 +69,37 @@ void routine(struct philo_data *philo)
 	struct timeval current_time;
 	long time;
 
-	if (!philo->is_dead)
-		left_fork = take_left_fork(philo->fork_table, philo->index);
-	if (!philo->is_dead)
-		right_fork = take_right_fork(philo->fork_table, philo->index);
+	left_fork = take_left_fork(philo->fork_table, philo->index, philo);
+	right_fork = take_right_fork(philo->fork_table, philo->index, philo);
 	if (left_fork == 1 && right_fork == 1)
 	{
 		gettimeofday(&current_time, NULL);
-		if (!philo->is_dead)
+
+		if (!check_dead(philo->is_dead))
 			printf("%ld %d is eating\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
-		(*philo).last_eat_time = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
+
+		pthread_mutex_lock(&lock_eat);
+		philo->last_eat_time = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
+		pthread_mutex_unlock(&lock_eat);
+
 		usleep((*philo).data->time_to_eat * 1000);
+
 		gettimeofday(&current_time, NULL);
-		if (!philo->is_dead)
+
+		if (!check_dead(philo->is_dead))
+		{
 			printf("%ld %d is sleeping\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
+		}
+
+		pthread_mutex_lock(&lock_f);
 		drop_left_fork(philo->fork_table, philo->index);
 		drop_right_fork(philo->fork_table, philo->index);
+		pthread_mutex_unlock(&lock_f);
+
 		usleep((*philo).data->time_to_sleep * 1000);
 		gettimeofday(&current_time, NULL);
-		if (!philo->is_dead)
+
+		if (!check_dead(philo->is_dead))
 			printf("%ld %d is thinking\n", ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000), philo->index);
 	}
 }
@@ -94,7 +119,10 @@ void	*philo_thread_func(void *p)
 	{
 		routine(philo);
 		if ((*philo).data->number_of_times_each_philosopher_must_eat)
+		{
+			printf("KGFHJHGDFKJGHDFJKGH\n");
 			i--;
+		}
 	}
 	return (NULL);
 }
@@ -110,15 +138,17 @@ void	check_philo_death(struct philo_data *philo)
 	while (1)
 	{
 		gettimeofday(&current_time, NULL);
-		while (i < (philo[0]).data->number_of_philosophers)
+		while (i < philo->data->number_of_philosophers)
 		{
-			die_timestamp = ((philo[i]).last_eat_time + (philo[0]).data->time_to_die);
+			pthread_mutex_lock(&lock_eat);
+			die_timestamp = (philo[i].last_eat_time + philo->data->time_to_die);
+			pthread_mutex_unlock(&lock_eat);
 			current_timestamp = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
 			if (die_timestamp < current_timestamp)
 			{
-				(philo[i]).is_dead = 1;
+				pthread_mutex_lock(&lock_d);
+				philo[i].is_dead = 1;
 				printf("%ld %d died\n", current_timestamp, (philo[i]).index);
-				//return ;
 				exit(0);
 			}
 			i++;
@@ -166,7 +196,12 @@ int	main(int argc, char **argv)
 		printf("Wrong inputs\n");
 		exit(1);
 	}
-	if (pthread_mutex_init(&lock, NULL) != 0)
+	if (pthread_mutex_init(&lock_f, NULL) != 0)
+    {
+        printf("\n mutex init failed\n");
+        return 1;
+    }
+	if (pthread_mutex_init(&lock_d, NULL) != 0)
     {
         printf("\n mutex init failed\n");
         return 1;
@@ -213,5 +248,7 @@ int	main(int argc, char **argv)
 	//-----------------------------------------//
 	free_philo_list(fork_table, data.number_of_philosophers);
 	free(philo_data);
-	pthread_mutex_destroy(&lock);
+	pthread_mutex_destroy(&lock_eat);
+	pthread_mutex_destroy(&lock_f);
+	pthread_mutex_destroy(&lock_d);
 }

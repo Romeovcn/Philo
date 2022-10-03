@@ -31,6 +31,7 @@ typedef struct philo_data
 {
 	int				index;
 	long			last_eat_time;
+	long			die_timestamp;
 	int				is_dead;
 	t_data			*data;
 	philo_list		*fork_table;
@@ -42,8 +43,8 @@ void				ft_lstadd_back(philo_list **lst, philo_list *new);
 void				ft_lstset_previous(philo_list *lst);
 void				set_circular(philo_list *lst);
 // Fork
-int					take_left_fork(philo_list *lst, int index);
-int					take_right_fork(philo_list *lst, int index);
+// int					take_left_fork(philo_list *lst, int index);
+// int					take_right_fork(philo_list *lst, int index);
 void				drop_left_fork(philo_list *lst, int index);
 void				drop_right_fork(philo_list *lst, int index);
 
