@@ -7,7 +7,8 @@ SRCSBONUS_DIR = srcs_bonus
 SRCS	=	philo.c \
 			lst_utils.c \
 			fork.c \
-			free_exit.c
+			free_exit.c \
+			parsing_utils.c
 
 SRCS_BONUS =
 
@@ -25,8 +26,8 @@ NAME_BONUS = pipex
 
 CC = gcc
 
-# CFLAGS = -pthread
-CFLAGS = -fsanitize=thread -pthread
+CFLAGS = -pthread
+# CFLAGS = -fsanitize=thread -pthread
 
 # -- RULES -- #
 

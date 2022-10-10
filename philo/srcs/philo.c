@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rvincent  <rvincent@student.42.fr   >      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 1970/01/01 01:00:00 by rvincent          #+#    #+#             */
+/*   Updated: 2022/10/10 18:50:19 by rvincent         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "philo.h"
 
 void go_to_sleep(long timestamp_to_wait)
@@ -40,7 +52,6 @@ int routine(struct philo_data *philo)
 	int left_fork;
 	int right_fork;
 	struct timeval current_time;
-	long time;
 
 	left_fork = take_left_fork(philo->fork_table, philo->index, philo);
 	right_fork = take_right_fork(philo->fork_table, philo->index, philo);
@@ -51,18 +62,14 @@ int routine(struct philo_data *philo)
 		pthread_mutex_lock(&philo->data->lock_eat);
 		philo->last_eat_time = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
 		pthread_mutex_unlock(&philo->data->lock_eat);
-		// go_to_sleep(((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000) + (*philo).data->time_to_eat);
 		usleep((*philo).data->time_to_eat * 1000);
-
 		gettimeofday(&current_time, NULL);
 		print_action(philo, "is sleeping\n", current_time);
 		pthread_mutex_lock(&philo->data->lock_fork);
 		drop_left_fork(philo->fork_table, philo->index);
 		drop_right_fork(philo->fork_table, philo->index);
 		pthread_mutex_unlock(&philo->data->lock_fork);
-		// go_to_sleep(((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000) + (*philo).data->time_to_sleep);
 		usleep((*philo).data->time_to_sleep * 1000);
-
 		gettimeofday(&current_time, NULL);
 		print_action(philo, "is thinking\n", current_time);
 	}
@@ -78,18 +85,12 @@ void	*philo_thread_func(void *p)
 	int j;
 
 	philo = (struct philo_data *)p;
-	if ((*philo).data->number_of_times_each_philosopher_must_eat == 0)
-		i = 1;
-	else
-		i = (*philo).data->number_of_times_each_philosopher_must_eat;
 	if ((*philo).index % 2 == 1)
 		usleep(10000);
-	while (i)
+	while (1)
 	{
 		if (routine(philo))
 			break ;
-		if ((*philo).data->number_of_times_each_philosopher_must_eat)
-			i--;
 	}
 	// philo->data->finished_philos++;
 	// printf("FINISHED=%d\n", philo->data->finished_philos);
@@ -118,7 +119,6 @@ void check_philo_death(struct philo_data *philo, pthread_t *philo_thread)
 				pthread_mutex_lock(&philo->data->lock_dead);
 				philo->data->is_dead = 1;
 				pthread_mutex_unlock(&philo->data->lock_dead);
-				// printf("%ld %d died\n", current_timestamp, (philo[i]).index);
 				printf("%ld %d died\n", die_timestamp, (philo[i]).index);
 				return ;
 			}
@@ -128,33 +128,24 @@ void check_philo_death(struct philo_data *philo, pthread_t *philo_thread)
 	}
 }
 
-void	get_data(t_data *data, char **argv)
+int	get_data(t_data *data, char **argv)
 {
-	data->number_of_philosophers = atoi(argv[1]);
-	data->time_to_die = atoi(argv[2]);
-	data->time_to_eat = atoi(argv[3]);
-	data->time_to_sleep = atoi(argv[4]);
+	data->number_of_philosophers = ft_atoi(argv[1]);
+	data->time_to_die = ft_atoi(argv[2]);
+	data->time_to_eat = ft_atoi(argv[3]);
+	data->time_to_sleep = ft_atoi(argv[4]);
 	data->is_dead = 0;
 	data->finished_philos = 0;
 	if (argv[5])
-	 	data->number_of_times_each_philosopher_must_eat = atoi(argv[5]);
+	 	data->number_of_times_each_philosopher_must_eat = ft_atoi(argv[5]);
 	else
 		data->number_of_times_each_philosopher_must_eat = 0;
 	if (pthread_mutex_init(&data->lock_fork, NULL) != 0)
-    {
-        printf("Mutex init failed\n");
-        exit(1);
-    }
+        return (printf("Mutex init failed\n"), 1);
 	if (pthread_mutex_init(&data->lock_eat, NULL) != 0)
-    {
-        printf("Mutex init failed\n");
-        exit(1);
-    }
+        return (printf("Mutex init failed\n"), 1);
 	if (pthread_mutex_init(&data->lock_dead, NULL) != 0)
-    {
-        printf("Mutex init failed\n");
-        exit(1);
-    }
+        return (printf("Mutex init failed\n"), 1);
 }
 
 int init_threads(t_data *data, philo_list *fork_table)
@@ -198,6 +189,8 @@ int	main(int argc, char **argv)
 	//-----------------------------------------//
 	//				Fork list				   //
 	//-----------------------------------------//
+	if (check_error(argc, argv))
+		return 1;
 	get_data(&data, argv);
 	fork_table = NULL;
 	i = 1;

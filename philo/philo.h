@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   philo.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: rvincent  <rvincent@student.42.fr   >      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 1970/01/01 01:00:00 by rvincent          #+#    #+#             */
+/*   Updated: 2022/10/10 18:28:43 by rvincent         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PHILO_H
 # define PHILO_H
 
@@ -44,12 +56,16 @@ typedef struct philo_data
 	t_data			*data;
 	philo_list		*fork_table;
 }					p_data;
-// Get table
+// Lst utils
 philo_list			*ft_lstnew(int index);
 philo_list			*ft_lstlast(philo_list *lst);
 void				ft_lstadd_back(philo_list **lst, philo_list *new);
 void				ft_lstset_previous(philo_list *lst);
 void				set_circular(philo_list *lst);
+// Utils
+long				ft_atoi(const char *str);
+int					is_not_numeric(char *s);
+int					is_more_10_char(char *s);
 // Fork
 void				drop_left_fork(philo_list *lst, int index);
 void				drop_right_fork(philo_list *lst, int index);
@@ -57,6 +73,7 @@ int					take_left_fork(philo_list *lst, int index, p_data *philo);
 int					take_right_fork(philo_list *lst, int index, p_data *philo);
 // Free exit
 void				free_philo_list(philo_list *lst, int size);
+int					check_error(int argc, char **argv);
 // Main
 int					check_dead(t_data *data);
 
