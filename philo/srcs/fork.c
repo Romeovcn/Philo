@@ -12,7 +12,7 @@
 
 #include "philo.h"
 
-void	drop_left_fork(philo_list *lst, int index)
+void	drop_left_fork(t_philo_list *lst, int index)
 {
 	while (lst->index != index)
 		lst = lst->next;
@@ -20,7 +20,7 @@ void	drop_left_fork(philo_list *lst, int index)
 	lst->left_fork = 1;
 }
 
-void	drop_right_fork(philo_list *lst, int index)
+void	drop_right_fork(t_philo_list *lst, int index)
 {
 	while (lst->index != index)
 		lst = lst->next;
@@ -28,16 +28,15 @@ void	drop_right_fork(philo_list *lst, int index)
 	lst->right_fork = 1;
 }
 
-int	take_left_fork(philo_list *lst, int index, p_data *philo)
+int	take_left_fork(t_philo_list *lst, int index, t_philo_data *philo)
 {
 	struct timeval	current_time;
 
-	while (lst->index != index)
-		lst = lst->next;
 	while (1)
 	{
-		if (check_dead(philo->data))
-			return (-1);
+		pthread_mutex_lock(&philo->data->lock_dead);
+		if (philo->data->is_dead)
+			return (pthread_mutex_unlock(&philo->data->lock_dead), -1);
 		else
 		{
 			pthread_mutex_lock(&philo->data->lock_fork);
@@ -48,25 +47,25 @@ int	take_left_fork(philo_list *lst, int index, p_data *philo)
 							* 1000000 + current_time.tv_usec) / 1000), index);
 				lst->previous->right_fork = 0;
 				lst->left_fork = 0;
-				pthread_mutex_unlock(&philo->data->lock_fork);
-				return (1);
+				return (pthread_mutex_unlock(&philo->data->lock_fork),
+					pthread_mutex_unlock(&philo->data->lock_dead), 1);
 			}
 			pthread_mutex_unlock(&philo->data->lock_fork);
+			pthread_mutex_unlock(&philo->data->lock_dead);
 		}
+		usleep(100);
 	}
-	return (0);
 }
 
-int	take_right_fork(philo_list *lst, int index, p_data *philo)
+int	take_right_fork(t_philo_list *lst, int index, t_philo_data *philo)
 {
 	struct timeval	current_time;
 
-	while (lst->index != index)
-		lst = lst->next;
 	while (1)
 	{
-		if (check_dead(philo->data))
-			return (-1);
+		pthread_mutex_lock(&philo->data->lock_dead);
+		if (philo->data->is_dead)
+			return (pthread_mutex_unlock(&philo->data->lock_dead), -1);
 		else
 		{
 			pthread_mutex_lock(&philo->data->lock_fork);
@@ -77,11 +76,12 @@ int	take_right_fork(philo_list *lst, int index, p_data *philo)
 							* 1000000 + current_time.tv_usec) / 1000), index);
 				lst->next->left_fork = 0;
 				lst->right_fork = 0;
-				pthread_mutex_unlock(&philo->data->lock_fork);
-				return (1);
+				return (pthread_mutex_unlock(&philo->data->lock_fork),
+					pthread_mutex_unlock(&philo->data->lock_dead), 1);
 			}
 			pthread_mutex_unlock(&philo->data->lock_fork);
+			pthread_mutex_unlock(&philo->data->lock_dead);
 		}
+		usleep(100);
 	}
-	return (0);
 }

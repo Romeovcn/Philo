@@ -12,9 +12,9 @@
 
 #include "philo.h"
 
-void	free_philo_list(philo_list *lst, int size)
+void	free_philo_list(t_philo_list *lst, int size)
 {
-	philo_list	*next;
+	t_philo_list	*next;
 
 	while (size)
 	{
@@ -25,21 +25,13 @@ void	free_philo_list(philo_list *lst, int size)
 	}
 }
 
-int	check_error(int argc, char **argv)
+void	free_and_exit(t_data data, t_philo_list *fork_table,
+		pthread_t *philo_thread, struct philo_data *philo_data)
 {
-	int	i;
-
-	if (argc != 5 && argc != 6)
-		return (printf("Wrong number of arguments.\n"), 1);
-	i = 1;
-	while (argv[i])
-	{
-		if (is_not_numeric(argv[i]))
-			return (printf("Arguments must contain only numerics values, be positive and inferior to 2147483648.\n"), 1);
-		if (is_more_10_char(argv[i]))
-			return (printf("Arguments must contain only numerics values, be positive and inferior to 2147483648.\n"), 1);
-		if (ft_atoi(argv[i]) < 0 || ft_atoi(argv[i]) > 2147483647)
-			return (printf("Arguments must contain only numerics values, be positive and inferior to 2147483648.\n"), 1);
-		i++;
-	}
+	free(philo_thread);
+	free(philo_data);
+	free_philo_list(fork_table, data.number_of_philosophers);
+	pthread_mutex_destroy(&data.lock_eat);
+	pthread_mutex_destroy(&data.lock_fork);
+	pthread_mutex_destroy(&data.lock_dead);
 }

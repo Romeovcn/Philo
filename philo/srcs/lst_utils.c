@@ -12,11 +12,11 @@
 
 #include "philo.h"
 
-philo_list	*ft_lstnew(int index)
+t_philo_list	*ft_lstnew(int index)
 {
-	philo_list	*result;
+	t_philo_list	*result;
 
-	result = malloc(sizeof(philo_list));
+	result = malloc(sizeof(t_philo_list));
 	if (!result)
 		return (0);
 	result->index = index;
@@ -27,9 +27,9 @@ philo_list	*ft_lstnew(int index)
 	return (result);
 }
 
-philo_list	*ft_lstlast(philo_list *lst)
+t_philo_list	*ft_lstlast(t_philo_list *lst)
 {
-	philo_list	*head;
+	t_philo_list	*head;
 
 	if (lst == NULL)
 		return (0);
@@ -39,9 +39,9 @@ philo_list	*ft_lstlast(philo_list *lst)
 	return (head);
 }
 
-void	ft_lstadd_back(philo_list **lst, philo_list *new)
+void	ft_lstadd_back(t_philo_list **lst, t_philo_list *new)
 {
-	philo_list	*last;
+	t_philo_list	*last;
 
 	if (*lst)
 	{
@@ -52,7 +52,7 @@ void	ft_lstadd_back(philo_list **lst, philo_list *new)
 		*lst = new;
 }
 
-void	ft_lstset_previous(philo_list *lst)
+void	ft_lstset_previous(t_philo_list *lst)
 {
 	while (lst->next)
 	{
@@ -61,9 +61,9 @@ void	ft_lstset_previous(philo_list *lst)
 	}
 }
 
-void	set_circular(philo_list *lst)
+void	set_circular(t_philo_list *lst)
 {
-	philo_list	*head;
+	t_philo_list	*head;
 
 	head = lst;
 	while (lst->next)

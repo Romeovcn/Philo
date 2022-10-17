@@ -2,32 +2,41 @@ SRCS_DIR = srcs
 
 OBJS_DIR = objs
 
+OBJSBONUS_DIR = objs_bonus
+
 SRCSBONUS_DIR = srcs_bonus
 
 SRCS	=	philo.c \
-			lst_utils.c \
+			check_philos.c \
 			fork.c \
 			free_exit.c \
-			parsing_utils.c
+			lst_utils.c \
+			parsing.c \
+			routine_utils.c \
+			get_data.c \
+			routine.c
 
-SRCS_BONUS =
+SRCS_BONUS	=	philo.c \
+				parsing.c \
+				get_data.c \
+				free_and_exit.c
 
 OBJS = ${patsubst %.c,${OBJS_DIR}/%.o,${SRCS}}
 
-OBJS_BONUS = ${patsubst %.c,${OBJS_DIR}/%.o,${SRCS_BONUS}}
+OBJS_BONUS = ${patsubst %.c,${OBJSBONUS_DIR}/%.o,${SRCS_BONUS}}
 
 HEADERS = philo.h
 
-HEADERS_BONUS = 
+HEADERS_BONUS = philo_bonus.h
 
 NAME = philo
 
-NAME_BONUS = pipex
+NAME_BONUS = philo
 
 CC = gcc
 
-CFLAGS = -pthread
-# CFLAGS = -fsanitize=thread -pthread
+# CFLAGS = -pthread
+CFLAGS = -fsanitize=thread -pthread
 
 # -- RULES -- #
 
@@ -39,15 +48,21 @@ ${NAME}: ${OBJS_DIR} ${OBJS} ${HEADERS}
 all: ${NAME}
 
 $(OBJS_DIR):
-	@mkdir ${OBJS_DIR}
+	@mkdir -p ${OBJS_DIR}
+	@echo "\033[33mCompiling Philo..."
+
+${OBJSBONUS_DIR}:
+	@mkdir -p ${OBJSBONUS_DIR}
+	@echo "\033[33mCompiling Philo..."
 
 ${OBJS_DIR}/%.o: ${SRCS_DIR}/%.c
 	@${CC} ${CFLAGS} -I. -c $< -o $@
 
-${OBJS_DIR}/%.o: ${SRCSBONUS_DIR}/%.c
+${OBJSBONUS_DIR}/%.o: ${SRCSBONUS_DIR}/%.c
 	@${CC} ${CFLAGS} -I. -c $< -o $@
 
 clean:
+	@rm -rf ${OBJSBONUS_DIR}
 	@rm -rf ${OBJS_DIR}
 
 fclean: clean
@@ -55,7 +70,8 @@ fclean: clean
 
 re: fclean all
 
-bonus: ${OBJS_DIR} ${OBJS_BONUS} ${HEADERS}
+bonus: ${OBJSBONUS_DIR} ${OBJS_BONUS} ${HEADERS_BONUS}
+	@rm -rf ${OBJS_DIR}
 	@${CC} ${CFLAGS} ${OBJS_BONUS} -o ${NAME_BONUS}
 	@echo "\033[32mBonus compiled !"
 	@echo "----------------------------\033[0m"
