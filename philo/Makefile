@@ -16,10 +16,12 @@ SRCS	=	philo.c \
 			get_data.c \
 			routine.c
 
-SRCS_BONUS	=	philo.c \
-				parsing.c \
-				get_data.c \
-				free_and_exit.c
+SRCS_BONUS	=	check_philos_bonus.c \
+				philo_bonus.c \
+				routine_bonus.c \
+				parsing_bonus.c \
+				get_data_bonus.c \
+				free_and_exit_bonus.c
 
 OBJS = ${patsubst %.c,${OBJS_DIR}/%.o,${SRCS}}
 
@@ -35,8 +37,8 @@ NAME_BONUS = philo
 
 CC = gcc
 
-# CFLAGS = -pthread
-CFLAGS = -fsanitize=thread -pthread
+CFLAGS = -pthread -Werror -Wall -Wextra
+# CFLAGS = -fsanitize=thread -pthread
 
 # -- RULES -- #
 

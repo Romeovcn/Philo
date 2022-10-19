@@ -20,12 +20,13 @@
 # include <stdio.h>
 # include <stdlib.h>
 # include <string.h>
+# include <sys/signal.h>
 # include <sys/stat.h>
 # include <sys/time.h>
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <unistd.h>
-# include <sys/signal.h>
+
 typedef struct s_data
 {
 	int		number_of_philosophers;
@@ -39,10 +40,11 @@ typedef struct s_data
 
 	pid_t	*pid;
 	sem_t	*sem_fork;
-	sem_t	*sem_death;
-	sem_t	*sem_exit;
+	sem_t	*sem_pause;
+	sem_t	*sem_kill_all;
 	sem_t	*sem_last_eat_time;
 	sem_t	*sem_exit_mutex;
+	sem_t	*sem_eat_complete;
 }			t_data;
 
 typedef struct philo_data
@@ -54,7 +56,9 @@ typedef struct philo_data
 	int		exit;
 	t_data	*data;
 }			t_philo_data;
-
+// Check philos
+void		*thread_check_finished_philos(void *arg);
+void		*thread_exit_check(void *p);
 // Parsing
 long		ft_atoi(const char *str);
 int			is_not_numeric(char *s);
@@ -64,5 +68,11 @@ int			check_error(int argc, char **argv);
 int			get_data(t_data *data, char **argv);
 // Free and exit
 void		free_and_exit(t_data data);
+void		kill_all(t_data data);
+// Routine
+void		post_message(t_philo_data philo_data, char *message,
+				long time_to_wait);
+void		take_fork(t_philo_data *philo_data);
+void		routine(t_philo_data *philo_data, int *eating_counter);
 
 #endif
