@@ -12,52 +12,68 @@
 
 #include "philo_bonus.h"
 
-void	post_message(t_philo_data philo_data, char *message, long time_to_wait)
+void	philo_take_fork(t_philo_data *philo_data)
 {
-	struct timeval	current_time;
-
-	sem_wait(philo_data.data->sem_pause);
-	gettimeofday(&current_time, NULL);
-	printf("%ld %d %s\n", ((current_time.tv_sec * 1000000
-				+ current_time.tv_usec) / 1000), philo_data.index, message);
-	sem_post(philo_data.data->sem_pause);
-	usleep(time_to_wait);
-}
-
-void	take_fork(t_philo_data *philo_data)
-{
-	struct timeval	current_time;
+	struct timeval	ct;
+	long			time_stamp;
 
 	sem_wait(philo_data->data->sem_fork);
 	sem_wait(philo_data->data->sem_pause);
-	gettimeofday(&current_time, NULL);
-	printf("%ld %d take fork\n", ((current_time.tv_sec * 1000000
-				+ current_time.tv_usec) / 1000), philo_data->index);
+	gettimeofday(&ct, NULL);
+	time_stamp = (ct.tv_sec * 1000000 + ct.tv_usec) / 1000;
+	printf("%ld %d take fork\n", time_stamp, philo_data->index);
 	sem_post(philo_data->data->sem_pause);
 }
 
-void	routine(t_philo_data *philo_data, int *eating_counter)
+void	philo_eat(t_philo_data *philo_data, int *eating_counter)
 {
-	struct timeval	current_time;
+	struct timeval	ct;
+	long			time_stamp;
 
-	take_fork(philo_data);
-	take_fork(philo_data);
-	gettimeofday(&current_time, NULL);
+	gettimeofday(&ct, NULL);
+	time_stamp = (ct.tv_sec * 1000000 + ct.tv_usec) / 1000;
 	sem_wait(philo_data->data->sem_last_eat_time);
-	philo_data->last_eat_time = ((current_time.tv_sec * 1000000
-				+ current_time.tv_usec) / 1000);
+	philo_data->last_eat_time = time_stamp;
 	sem_post(philo_data->data->sem_last_eat_time);
-	post_message(*philo_data, "is eating", philo_data->data->time_to_eat
-		* 1000);
+	sem_wait(philo_data->data->sem_pause);
+	printf("%ld %d is eating\n", time_stamp, philo_data->index);
+	sem_post(philo_data->data->sem_pause);
 	(*eating_counter)++;
 	if (*eating_counter == philo_data->data->nbr_philo_must_eat)
 	{
 		sem_wait(philo_data->data->sem_pause);
 		sem_post(philo_data->data->sem_eat_complete);
 	}
+	usleep(philo_data->data->time_to_eat * 1000);
+}
+
+void	philo_sleep(t_philo_data *philo_data)
+{
+	struct timeval	ct;
+	long			time_stamp;
+
+	gettimeofday(&ct, NULL);
+	time_stamp = (ct.tv_sec * 1000000 + ct.tv_usec) / 1000;
+	sem_wait(philo_data->data->sem_pause);
+	printf("%ld %d is sleeping\n", time_stamp, philo_data->index);
+	sem_post(philo_data->data->sem_pause);
+	usleep(philo_data->data->time_to_sleep * 1000);
+	gettimeofday(&ct, NULL);
+	time_stamp = (ct.tv_sec * 1000000 + ct.tv_usec) / 1000;
+	sem_wait(philo_data->data->sem_pause);
+	printf("%ld %d is thinking\n", time_stamp, philo_data->index);
+	sem_post(philo_data->data->sem_pause);
+}
+
+void	routine(t_philo_data *philo_data, int *eating_counter)
+{
+	struct timeval	ct;
+
+	philo_take_fork(philo_data);
+	philo_take_fork(philo_data);
+	gettimeofday(&ct, NULL);
+	philo_eat(philo_data, eating_counter);
 	sem_post(philo_data->data->sem_fork);
 	sem_post(philo_data->data->sem_fork);
-	post_message(*philo_data, "is sleeping", philo_data->data->time_to_sleep
-		* 1000);
-	post_message(*philo_data, "is thinking", 0);
+	philo_sleep(philo_data);
 }

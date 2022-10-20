@@ -14,12 +14,7 @@
 
 int	get_data(t_data *data, char **argv)
 {
-	sem_unlink("sem_fork");
-	sem_unlink("sem_pause");
-	sem_unlink("sem_kill_all");
-	sem_unlink("sem_last_eat_time");
-	sem_unlink("sem_eat_complete");
-	data->number_of_philosophers = ft_atoi(argv[1]);
+	data->philos_nbr = ft_atoi(argv[1]);
 	data->time_to_die = ft_atoi(argv[2]);
 	data->time_to_eat = ft_atoi(argv[3]);
 	data->time_to_sleep = ft_atoi(argv[4]);
@@ -29,5 +24,15 @@ int	get_data(t_data *data, char **argv)
 		data->nbr_philo_must_eat = ft_atoi(argv[5]);
 	if (data->nbr_philo_must_eat == 0)
 		return (1);
+	sem_unlink("sem_fork");
+	sem_unlink("sem_pause");
+	sem_unlink("sem_kill_all");
+	sem_unlink("sem_last_eat_time");
+	sem_unlink("sem_eat_complete");
+	data->sem_fork = sem_open("sem_fork", O_CREAT, 0666, data->philos_nbr);
+	data->sem_pause = sem_open("sem_pause", O_CREAT, 0666, 1);
+	data->sem_kill_all = sem_open("sem_kill_all", O_CREAT, 0666, 0);
+	data->sem_last_eat_time = sem_open("sem_last_eat_time", O_CREAT, 0666, 1);
+	data->sem_eat_complete = sem_open("sem_eat_complete", O_CREAT, 0666, 0);
 	return (0);
 }

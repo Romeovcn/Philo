@@ -26,10 +26,11 @@
 # include <sys/types.h>
 # include <sys/wait.h>
 # include <unistd.h>
+# include <signal.h>
 
 typedef struct s_data
 {
-	int		number_of_philosophers;
+	int		philos_nbr;
 	int		time_to_die;
 	int		time_to_eat;
 	int		time_to_sleep;
@@ -57,7 +58,7 @@ typedef struct philo_data
 	t_data	*data;
 }			t_philo_data;
 // Check philos
-void		*thread_check_finished_philos(void *arg);
+void		*philos_eat_check_func(void *arg);
 void		*thread_exit_check(void *p);
 // Parsing
 long		ft_atoi(const char *str);
