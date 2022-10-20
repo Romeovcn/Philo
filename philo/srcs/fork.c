@@ -30,58 +30,52 @@ void	drop_right_fork(t_philo_list *lst, int index)
 
 int	take_left_fork(t_philo_list *lst, int index, t_philo_data *philo)
 {
-	struct timeval	current_time;
+	struct timeval	ct;
 
 	while (1)
 	{
 		pthread_mutex_lock(&philo->data->lock_dead);
 		if (philo->data->is_dead)
 			return (pthread_mutex_unlock(&philo->data->lock_dead), -1);
-		else
+		pthread_mutex_lock(&philo->data->lock_fork);
+		if (lst->left_fork)
 		{
-			pthread_mutex_lock(&philo->data->lock_fork);
-			if (lst->left_fork)
-			{
-				gettimeofday(&current_time, NULL);
-				printf("%ld %d has taken a fork\n", ((current_time.tv_sec
-							* 1000000 + current_time.tv_usec) / 1000), index);
-				lst->previous->right_fork = 0;
-				lst->left_fork = 0;
-				return (pthread_mutex_unlock(&philo->data->lock_fork),
-					pthread_mutex_unlock(&philo->data->lock_dead), 1);
-			}
-			pthread_mutex_unlock(&philo->data->lock_fork);
-			pthread_mutex_unlock(&philo->data->lock_dead);
+			gettimeofday(&ct, NULL);
+			printf("%ld %d has taken a fork\n", ((ct.tv_sec
+						* 1000000 + ct.tv_usec) / 1000), index);
+			lst->previous->right_fork = 0;
+			lst->left_fork = 0;
+			return (pthread_mutex_unlock(&philo->data->lock_fork),
+				pthread_mutex_unlock(&philo->data->lock_dead), 1);
 		}
+		pthread_mutex_unlock(&philo->data->lock_fork);
+		pthread_mutex_unlock(&philo->data->lock_dead);
 		usleep(100);
 	}
 }
 
 int	take_right_fork(t_philo_list *lst, int index, t_philo_data *philo)
 {
-	struct timeval	current_time;
+	struct timeval	ct;
 
 	while (1)
 	{
 		pthread_mutex_lock(&philo->data->lock_dead);
 		if (philo->data->is_dead)
 			return (pthread_mutex_unlock(&philo->data->lock_dead), -1);
-		else
+		pthread_mutex_lock(&philo->data->lock_fork);
+		if (lst->right_fork)
 		{
-			pthread_mutex_lock(&philo->data->lock_fork);
-			if (lst->right_fork)
-			{
-				gettimeofday(&current_time, NULL);
-				printf("%ld %d has taken a fork\n", ((current_time.tv_sec
-							* 1000000 + current_time.tv_usec) / 1000), index);
-				lst->next->left_fork = 0;
-				lst->right_fork = 0;
-				return (pthread_mutex_unlock(&philo->data->lock_fork),
-					pthread_mutex_unlock(&philo->data->lock_dead), 1);
-			}
-			pthread_mutex_unlock(&philo->data->lock_fork);
-			pthread_mutex_unlock(&philo->data->lock_dead);
+			gettimeofday(&ct, NULL);
+			printf("%ld %d has taken a fork\n", ((ct.tv_sec
+						* 1000000 + ct.tv_usec) / 1000), index);
+			lst->next->left_fork = 0;
+			lst->right_fork = 0;
+			return (pthread_mutex_unlock(&philo->data->lock_fork),
+				pthread_mutex_unlock(&philo->data->lock_dead), 1);
 		}
+		pthread_mutex_unlock(&philo->data->lock_fork);
+		pthread_mutex_unlock(&philo->data->lock_dead);
 		usleep(100);
 	}
 }

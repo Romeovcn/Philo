@@ -12,9 +12,8 @@
 
 #include "philo_bonus.h"
 
-void	free_and_exit(t_data data)
+void	close_sems(t_data data)
 {
-	free(data.pid);
 	if (data.sem_pause != SEM_FAILED)
 		sem_close(data.sem_pause);
 	if (data.sem_fork != SEM_FAILED)
@@ -42,4 +41,14 @@ void	kill_all(t_data data)
 	i = 0;
 	while (i++ < data.philos_nbr)
 		sem_post(data.sem_eat_complete);
+}
+
+void	fork_fail_exit(t_data data, int i)
+{
+	i--;
+	while (i >= 0)
+		kill(data.pid[i--], SIGKILL);
+	close_sems(data);
+	free(data.pid);
+	exit (1);
 }

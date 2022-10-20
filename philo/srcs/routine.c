@@ -12,7 +12,7 @@
 
 #include "philo.h"
 
-void	start_routine(struct philo_data *philo)
+void	start_routine(t_philo_data *philo)
 {
 	struct timeval	current_time;
 
@@ -37,7 +37,7 @@ void	start_routine(struct philo_data *philo)
 	print_action(philo, "is thinking\n", current_time);
 }
 
-int	init_routine(struct philo_data *philo)
+int	init_routine(t_philo_data *philo)
 {
 	int	left_fork;
 	int	right_fork;
@@ -55,9 +55,9 @@ int	init_routine(struct philo_data *philo)
 
 void	*philo_thread_func(void *p)
 {
-	struct philo_data	*philo;
+	t_philo_data	*philo;
 
-	philo = (struct philo_data *)p;
+	philo = (t_philo_data *)p;
 	if ((*philo).index % 2 == 1)
 		usleep(10000);
 	while (1)
@@ -68,37 +68,34 @@ void	*philo_thread_func(void *p)
 	return (NULL);
 }
 
-int	init_threads(t_data *data, t_philo_list *fork_table,
-		pthread_t *philo_thread, struct philo_data *philo_data)
+void	init_threads(t_data *data, t_philo_list *fork_table,
+		pthread_t *philo_thread, t_philo_data *philo_data)
 {
-	struct timeval	current_time;
+	struct timeval	ct;
 	int				i;
 
 	i = 1;
-	gettimeofday(&current_time, NULL);
-	data->start_timestamp = ((current_time.tv_sec * 1000000
-				+ current_time.tv_usec) / 1000);
-	while (i <= data->number_of_philosophers)
+	gettimeofday(&ct, NULL);
+	while (i <= data->philos_nbr)
 	{
 		philo_data[i - 1].fork_table = fork_table;
 		philo_data[i - 1].data = data;
 		philo_data[i - 1].index = i;
 		philo_data[i - 1].nbr_of_eat = 0;
-		philo_data[i - 1].last_eat_time = ((current_time.tv_sec * 1000000
-					+ current_time.tv_usec) / 1000);
+		philo_data[i - 1].last_eat_time = ((ct.tv_sec * 1000000
+					+ ct.tv_usec) / 1000);
 		pthread_create(&philo_thread[i - 1], NULL, philo_thread_func,
 			&philo_data[i - 1]);
 		i++;
 	}
-	return (0);
 }
 
-void	join_threads(pthread_t *philo_thread, int number_of_philosophers)
+void	join_threads(pthread_t *philo_thread, int philos_nbr)
 {
 	int	i;
 
 	i = 1;
-	while (i <= number_of_philosophers)
+	while (i <= philos_nbr)
 	{
 		pthread_join(philo_thread[i - 1], NULL);
 		i++;

@@ -23,7 +23,7 @@
 
 typedef struct s_data
 {
-	int				number_of_philosophers;
+	int				philos_nbr;
 	int				time_to_die;
 	int				time_to_eat;
 	int				time_to_sleep;
@@ -71,7 +71,7 @@ int					check_error(int argc, char **argv);
 // Routine utils
 void				go_to_sleep(long timestamp_to_wait, t_data *data);
 int					check_dead(t_data *data);
-int					print_action(struct philo_data *philo, char *message,
+int					print_action(t_philo_data *philo, char *message,
 						struct timeval current_time);
 // Fork
 void				drop_left_fork(t_philo_list *lst, int index);
@@ -83,22 +83,22 @@ int					take_right_fork(t_philo_list *lst, int index,
 // Main
 int					check_dead(t_data *data);
 // Check philos
-void				check_philo_death(struct philo_data *philo);
+void				check_philo_death(t_philo_data *philo);
 // Get data
 int					get_data(t_data *data, char **argv);
 void				get_table(t_philo_list **fork_table,
-						int number_of_philosophers);
+						int philos_nbr);
 // Routine
-void				start_routine(struct philo_data *philo);
-int					init_routine(struct philo_data *philo);
+void				start_routine(t_philo_data *philo);
+int					init_routine(t_philo_data *philo);
 void				*philo_thread_func(void *p);
-int					init_threads(t_data *data, t_philo_list *fork_table,
-						pthread_t *philo_thread, struct philo_data *philo_data);
+void				init_threads(t_data *data, t_philo_list *fork_table,
+						pthread_t *philo_thread, t_philo_data *philo_data);
 void				join_threads(pthread_t *philo_thread,
-						int number_of_philosophers);
+						int philos_nbr);
 // Free exit
-void				free_t_philo_list(t_philo_list *lst, int size);
+void				free_philo_list(t_philo_list *lst, int size);
 void				free_and_exit(t_data data, t_philo_list *fork_table,
-						pthread_t *philo_thread, struct philo_data *philo_data);
+						pthread_t *philo_thread, t_philo_data *philo_data);
 
 #endif

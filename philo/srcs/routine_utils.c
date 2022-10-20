@@ -39,7 +39,7 @@ int	check_dead(t_data *data)
 	return (result);
 }
 
-int	print_action(struct philo_data *philo, char *message,
+int	print_action(t_philo_data *philo, char *message,
 		struct timeval current_time)
 {
 	pthread_mutex_lock(&philo->data->lock_dead);

@@ -26,11 +26,11 @@ void	free_philo_list(t_philo_list *lst, int size)
 }
 
 void	free_and_exit(t_data data, t_philo_list *fork_table,
-		pthread_t *philo_thread, struct philo_data *philo_data)
+		pthread_t *philo_thread, t_philo_data *philo_data)
 {
 	free(philo_thread);
 	free(philo_data);
-	free_philo_list(fork_table, data.number_of_philosophers);
+	free_philo_list(fork_table, data.philos_nbr);
 	pthread_mutex_destroy(&data.lock_eat);
 	pthread_mutex_destroy(&data.lock_fork);
 	pthread_mutex_destroy(&data.lock_dead);

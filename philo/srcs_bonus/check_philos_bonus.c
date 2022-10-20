@@ -31,7 +31,7 @@ void	*philos_eat_check_func(void *arg)
 	return (NULL);
 }
 
-void	*thread_exit_check(void *p)
+void	*death_check_func(void *p)
 {
 	t_philo_data	*philo_data;
 	struct timeval	ct;

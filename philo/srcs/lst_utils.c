@@ -18,7 +18,7 @@ t_philo_list	*ft_lstnew(int index)
 
 	result = malloc(sizeof(t_philo_list));
 	if (!result)
-		return (0);
+		return (NULL);
 	result->index = index;
 	result->left_fork = 1;
 	result->right_fork = 1;

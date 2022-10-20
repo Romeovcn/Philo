@@ -12,7 +12,7 @@
 
 #include "philo.h"
 
-int	check_deaths(struct philo_data *philo, struct timeval current_time)
+int	check_deaths(t_philo_data *philo, struct timeval current_time)
 {
 	long	die_timestamp;
 	long	current_timestamp;
@@ -33,12 +33,12 @@ int	check_deaths(struct philo_data *philo, struct timeval current_time)
 	return (0);
 }
 
-int	check_end(struct philo_data *philo)
+int	check_end(t_philo_data *philo)
 {
 	int	i;
 
 	i = 0;
-	while (i < philo->data->number_of_philosophers)
+	while (i < philo->data->philos_nbr)
 	{
 		pthread_mutex_lock(&philo->data->lock_eat);
 		if (philo[i].nbr_of_eat < philo->data->nbr_philo_must_eat)
@@ -55,7 +55,7 @@ int	check_end(struct philo_data *philo)
 	return (1);
 }
 
-void	check_philo_death(struct philo_data *philo)
+void	check_philo_death(t_philo_data *philo)
 {
 	int				i;
 	struct timeval	current_time;
@@ -67,7 +67,7 @@ void	check_philo_death(struct philo_data *philo)
 		if (philo->data->nbr_philo_must_eat > 0
 			&& check_end(philo))
 			return ;
-		while (i < philo->data->number_of_philosophers)
+		while (i < philo->data->philos_nbr)
 		{
 			if (check_deaths(&philo[i], current_time))
 				return ;
