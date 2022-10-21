@@ -33,7 +33,7 @@ HEADERS_BONUS = philo_bonus.h
 
 NAME = philo
 
-NAME_BONUS = philo
+NAME_BONUS = philo_bonus
 
 CC = gcc
 
@@ -45,6 +45,11 @@ CFLAGS = -pthread -Werror -Wall -Wextra
 ${NAME}: ${OBJS_DIR} ${OBJS} ${HEADERS}
 	@${CC} ${CFLAGS} ${OBJS} -o ${NAME}
 	@echo "\033[32m$ ${NAME} compiled !"
+	@echo "----------------------------\033[0m"
+
+${NAME_BONUS}: ${OBJSBONUS_DIR} ${OBJS_BONUS} ${HEADERS_BONUS}
+	@${CC} ${CFLAGS} ${OBJS_BONUS} -o ${NAME_BONUS}
+	@echo "\033[32mBonus compiled !"
 	@echo "----------------------------\033[0m"
 
 all: ${NAME}
@@ -72,10 +77,6 @@ fclean: clean
 
 re: fclean all
 
-bonus: ${OBJSBONUS_DIR} ${OBJS_BONUS} ${HEADERS_BONUS}
-	@rm -rf ${OBJS_DIR}
-	@${CC} ${CFLAGS} ${OBJS_BONUS} -o ${NAME_BONUS}
-	@echo "\033[32mBonus compiled !"
-	@echo "----------------------------\033[0m"
+bonus: ${NAME_BONUS}
 
 .PHONY:	all clean fclean re bonus
