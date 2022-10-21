@@ -34,9 +34,12 @@ int	child_func(t_data data, int index)
 
 int	create_childs(t_data *data)
 {
-	int	i;
+	struct timeval	ct;
+	int				i;
 
 	i = 0;
+	gettimeofday(&ct, NULL);
+	data->start_timestamp = (ct.tv_sec * 1000000 + ct.tv_usec) / 1000;
 	while (i < data->philos_nbr)
 	{
 		data->pid[i] = fork();

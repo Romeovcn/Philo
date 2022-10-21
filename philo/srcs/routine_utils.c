@@ -42,10 +42,13 @@ int	check_dead(t_data *data)
 int	print_action(t_philo_data *philo, char *message,
 		struct timeval current_time)
 {
+	long	time_stamp;
+
+	time_stamp = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000)
+		- philo->data->start_timestamp;
 	pthread_mutex_lock(&philo->data->lock_dead);
 	if (!philo->data->is_dead)
-		printf("%ld %d %s", ((current_time.tv_sec * 1000000
-					+ current_time.tv_usec) / 1000), philo->index, message);
+		printf("%ld %d %s", time_stamp, philo->index, message);
 	else
 	{
 		pthread_mutex_unlock(&philo->data->lock_dead);

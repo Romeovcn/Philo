@@ -37,6 +37,7 @@ typedef struct s_data
 	int		nbr_philo_must_eat;
 
 	int		index;
+	long	start_timestamp;
 
 	pid_t	*pid;
 
@@ -47,7 +48,7 @@ typedef struct s_data
 	sem_t	*sem_eat_complete;
 }			t_data;
 
-typedef t_philo_data
+typedef struct t_philo_data
 {
 	int		index;
 	long	last_eat_time;

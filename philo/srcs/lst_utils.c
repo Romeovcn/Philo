@@ -39,10 +39,22 @@ t_philo_list	*ft_lstlast(t_philo_list *lst)
 	return (head);
 }
 
-void	ft_lstadd_back(t_philo_list **lst, t_philo_list *new)
+int	ft_lstadd_back(t_philo_list **lst, t_philo_list *new)
 {
 	t_philo_list	*last;
+	t_philo_list	*tmp;
 
+	if (!new)
+	{
+		while (*lst)
+		{
+			tmp = (*lst)->next;
+			free(*lst);
+			*lst = tmp;
+		}
+		lst = NULL;
+		return (1);
+	}
 	if (*lst)
 	{
 		last = ft_lstlast(*lst);
@@ -50,6 +62,7 @@ void	ft_lstadd_back(t_philo_list **lst, t_philo_list *new)
 	}
 	else
 		*lst = new;
+	return (0);
 }
 
 void	ft_lstset_previous(t_philo_list *lst)

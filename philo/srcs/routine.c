@@ -25,12 +25,12 @@ void	start_routine(t_philo_data *philo)
 	pthread_mutex_unlock(&philo->data->lock_eat);
 	go_to_sleep(((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000)
 		+ (*philo).data->time_to_eat, philo->data);
-	gettimeofday(&current_time, NULL);
-	print_action(philo, "is sleeping\n", current_time);
 	pthread_mutex_lock(&philo->data->lock_fork);
 	drop_left_fork(philo->fork_table, philo->index);
 	drop_right_fork(philo->fork_table, philo->index);
 	pthread_mutex_unlock(&philo->data->lock_fork);
+	gettimeofday(&current_time, NULL);
+	print_action(philo, "is sleeping\n", current_time);
 	go_to_sleep(((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000)
 		+ (*philo).data->time_to_eat, philo->data);
 	gettimeofday(&current_time, NULL);
@@ -68,15 +68,16 @@ void	*philo_thread_func(void *p)
 	return (NULL);
 }
 
-void	init_threads(t_data *data, t_philo_list *fork_table,
+int	init_threads(t_data *data, t_philo_list *fork_table,
 		pthread_t *philo_thread, t_philo_data *philo_data)
 {
 	struct timeval	ct;
 	int				i;
 
-	i = 1;
+	i = 0;
 	gettimeofday(&ct, NULL);
-	while (i <= data->philos_nbr)
+	data->start_timestamp = (ct.tv_sec * 1000000 + ct.tv_usec) / 1000;
+	while (++i <= data->philos_nbr)
 	{
 		philo_data[i - 1].fork_table = fork_table;
 		philo_data[i - 1].data = data;
@@ -84,10 +85,17 @@ void	init_threads(t_data *data, t_philo_list *fork_table,
 		philo_data[i - 1].nbr_of_eat = 0;
 		philo_data[i - 1].last_eat_time = ((ct.tv_sec * 1000000
 					+ ct.tv_usec) / 1000);
-		pthread_create(&philo_thread[i - 1], NULL, philo_thread_func,
-			&philo_data[i - 1]);
-		i++;
+		if (pthread_create(&philo_thread[i - 1], NULL, philo_thread_func,
+				&philo_data[i - 1]) != 0)
+		{
+			pthread_mutex_lock(&data->lock_dead);
+			data->is_dead = 1;
+			pthread_mutex_unlock(&data->lock_dead);
+			thread_error_join(philo_thread, i);
+			return (printf("Error while initializing philo %d\n", i), 1);
+		}
 	}
+	return (0);
 }
 
 void	join_threads(pthread_t *philo_thread, int philos_nbr)

@@ -60,7 +60,7 @@ typedef struct philo_data
 // Lst utils
 t_philo_list		*ft_lstnew(int index);
 t_philo_list		*ft_lstlast(t_philo_list *lst);
-void				ft_lstadd_back(t_philo_list **lst, t_philo_list *new);
+int					ft_lstadd_back(t_philo_list **lst, t_philo_list *new);
 void				ft_lstset_previous(t_philo_list *lst);
 void				set_circular(t_philo_list *lst);
 // Parsing
@@ -86,13 +86,13 @@ int					check_dead(t_data *data);
 void				check_philo_death(t_philo_data *philo);
 // Get data
 int					get_data(t_data *data, char **argv);
-void				get_table(t_philo_list **fork_table,
+int					get_table(t_philo_list **fork_table,
 						int philos_nbr);
 // Routine
 void				start_routine(t_philo_data *philo);
 int					init_routine(t_philo_data *philo);
 void				*philo_thread_func(void *p);
-void				init_threads(t_data *data, t_philo_list *fork_table,
+int					init_threads(t_data *data, t_philo_list *fork_table,
 						pthread_t *philo_thread, t_philo_data *philo_data);
 void				join_threads(pthread_t *philo_thread,
 						int philos_nbr);
@@ -100,5 +100,6 @@ void				join_threads(pthread_t *philo_thread,
 void				free_philo_list(t_philo_list *lst, int size);
 void				free_and_exit(t_data data, t_philo_list *fork_table,
 						pthread_t *philo_thread, t_philo_data *philo_data);
+void				thread_error_join(pthread_t *philo_thread, int i);
 
 #endif

@@ -23,14 +23,16 @@ int	main(int argc, char **argv)
 	philo_data = NULL;
 	if (check_error(argc, argv) || get_data(&data, argv))
 		return (1);
-	get_table(&fork_table, data.philos_nbr);
+	if (get_table(&fork_table, data.philos_nbr))
+		return (free_and_exit(data, fork_table, philo_thread, philo_data), 1);
 	philo_thread = malloc(data.philos_nbr * sizeof(pthread_t));
 	if (!philo_thread)
 		return (free_and_exit(data, fork_table, philo_thread, philo_data), 1);
 	philo_data = malloc(data.philos_nbr * sizeof(t_philo_data));
 	if (!philo_data)
 		return (free_and_exit(data, fork_table, philo_thread, philo_data), 1);
-	init_threads(&data, fork_table, philo_thread, philo_data);
+	if (init_threads(&data, fork_table, philo_thread, philo_data))
+		return (free_and_exit(data, fork_table, philo_thread, philo_data), 1);
 	check_philo_death(philo_data);
 	join_threads(philo_thread, data.philos_nbr);
 	free_and_exit(data, fork_table, philo_thread, philo_data);

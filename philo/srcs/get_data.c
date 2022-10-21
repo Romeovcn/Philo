@@ -37,14 +37,16 @@ int	get_data(t_data *data, char **argv)
 	return (0);
 }
 
-void	get_table(t_philo_list **fork_table, int philos_nbr)
+int	get_table(t_philo_list **fork_table, int philos_nbr)
 {
 	int	i;
 
 	*fork_table = NULL;
 	i = 1;
 	while (i <= philos_nbr)
-		ft_lstadd_back(fork_table, ft_lstnew(i++));
+		if (ft_lstadd_back(fork_table, ft_lstnew(i++)))
+			return (1);
 	ft_lstset_previous(*fork_table);
 	set_circular(*fork_table);
+	return (0);
 }

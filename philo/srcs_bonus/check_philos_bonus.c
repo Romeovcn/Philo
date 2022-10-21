@@ -49,7 +49,7 @@ void	*death_check_func(void *p)
 		if (die_time < current_time)
 		{
 			sem_wait(philo_data->data->sem_pause);
-			printf("%ld %d died.\n", current_time, philo_data->index);
+			printf("%ld %d died.\n", current_time - philo_data->data->start_timestamp, philo_data->index);
 			sem_post(philo_data->data->sem_kill_all);
 			return (NULL);
 		}
