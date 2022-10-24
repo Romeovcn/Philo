@@ -14,15 +14,14 @@
 
 void	go_to_sleep(long timestamp_to_wait, t_data *data)
 {
-	struct timeval	current_time;
+	struct timeval	ct;
 
 	while (1)
 	{
-		gettimeofday(&current_time, NULL);
+		gettimeofday(&ct, NULL);
 		if (check_dead(data))
 			return ;
-		if (((current_time.tv_sec * 1000000 + current_time.tv_usec)
-				/ 1000) >= timestamp_to_wait)
+		if (get_time_stamp(ct) >= timestamp_to_wait)
 			return ;
 		usleep(100);
 	}
@@ -44,16 +43,16 @@ int	print_action(t_philo_data *philo, char *message,
 {
 	long	time_stamp;
 
-	time_stamp = ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000)
-		- philo->data->start_timestamp;
+	time_stamp = get_time_stamp(current_time) - philo->data->start_timestamp;
 	pthread_mutex_lock(&philo->data->lock_dead);
-	if (!philo->data->is_dead)
-		printf("%ld %d %s", time_stamp, philo->index, message);
-	else
-	{
-		pthread_mutex_unlock(&philo->data->lock_dead);
-		return (1);
-	}
+	if (philo->data->is_dead)
+		return (pthread_mutex_unlock(&philo->data->lock_dead), 1);
+	printf("%ld %d %s", time_stamp, philo->index, message);
 	pthread_mutex_unlock(&philo->data->lock_dead);
 	return (0);
+}
+
+long	get_time_stamp(struct timeval current_time)
+{
+	return ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
 }

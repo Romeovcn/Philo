@@ -73,6 +73,7 @@ void				go_to_sleep(long timestamp_to_wait, t_data *data);
 int					check_dead(t_data *data);
 int					print_action(t_philo_data *philo, char *message,
 						struct timeval current_time);
+long				get_time_stamp(struct timeval current_time);
 // Fork
 void				drop_left_fork(t_philo_list *lst, int index);
 void				drop_right_fork(t_philo_list *lst, int index);
@@ -90,7 +91,7 @@ int					get_table(t_philo_list **fork_table,
 						int philos_nbr);
 // Routine
 void				start_routine(t_philo_data *philo);
-int					init_routine(t_philo_data *philo);
+int					philo_routine(t_philo_data *philo);
 void				*philo_thread_func(void *p);
 int					init_threads(t_data *data, t_philo_list *fork_table,
 						pthread_t *philo_thread, t_philo_data *philo_data);

@@ -42,8 +42,7 @@ int	take_left_fork(t_philo_list *lst, int index, t_philo_data *philo)
 		if (lst->left_fork)
 		{
 			gettimeofday(&ct, NULL);
-			time_stamp = ((ct.tv_sec * 1000000 + ct.tv_usec) / 1000)
-				- philo->data->start_timestamp;
+			time_stamp = get_time_stamp(ct) - philo->data->start_timestamp;
 			printf("%ld %d has taken a fork\n", time_stamp, index);
 			lst->previous->right_fork = 0;
 			lst->left_fork = 0;
@@ -71,8 +70,7 @@ int	take_right_fork(t_philo_list *lst, int index, t_philo_data *philo)
 		if (lst->right_fork)
 		{
 			gettimeofday(&ct, NULL);
-			time_stamp = ((ct.tv_sec * 1000000 + ct.tv_usec) / 1000)
-				- philo->data->start_timestamp;
+			time_stamp = get_time_stamp(ct) - philo->data->start_timestamp;
 			printf("%ld %d has taken a fork\n", time_stamp, index);
 			lst->next->left_fork = 0;
 			lst->right_fork = 0;

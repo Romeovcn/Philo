@@ -75,6 +75,8 @@ void		fork_fail_exit(t_data data, int i);
 void		post_message(t_philo_data philo_data, char *message,
 				long time_to_wait);
 void		take_fork(t_philo_data *philo_data);
-void		routine(t_philo_data *philo_data, int *eating_counter);
+void		philo_routine(t_philo_data *philo_data, int *eating_counter);
+
+long		get_time_stamp(struct timeval current_time);
 
 #endif

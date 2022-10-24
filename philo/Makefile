@@ -38,7 +38,7 @@ NAME_BONUS = philo_bonus
 CC = gcc
 
 CFLAGS = -pthread -Werror -Wall -Wextra
-# CFLAGS = -fsanitize=thread -pthread
+# CFLAGS = -fsanitize=thread -pthread -Werror -Wall -Wextra
 
 # -- RULES -- #
 
@@ -71,6 +71,7 @@ ${OBJSBONUS_DIR}/%.o: ${SRCSBONUS_DIR}/%.c
 clean:
 	@rm -rf ${OBJSBONUS_DIR}
 	@rm -rf ${OBJS_DIR}
+	@echo "\033[32mClean !\033[0m"
 
 fclean: clean
 	@rm -f ${NAME} ${NAME_BONUS}

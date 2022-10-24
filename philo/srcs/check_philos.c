@@ -22,14 +22,13 @@ int	check_deaths(t_philo_data *philo)
 	die_timestamp = (philo->last_eat_time + philo->data->time_to_die);
 	pthread_mutex_unlock(&philo->data->lock_eat);
 	gettimeofday(&ct, NULL);
-	current_timestamp = ((ct.tv_sec * 1000000 + ct.tv_usec)
-			/ 1000);
+	current_timestamp = get_time_stamp(ct);
 	if (die_timestamp < current_timestamp)
 	{
 		pthread_mutex_lock(&philo->data->lock_dead);
 		philo->data->is_dead = 1;
 		pthread_mutex_unlock(&philo->data->lock_dead);
-		printf("%ld %d died\n", die_timestamp - philo->data->start_timestamp,
+		printf("%ld %d died\n", current_timestamp - philo->data->start_timestamp,
 			philo->index);
 		return (1);
 	}

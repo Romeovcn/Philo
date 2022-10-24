@@ -12,6 +12,60 @@
 
 #include "philo.h"
 
+void	join_threads(pthread_t *philo_thread, int philos_nbr)
+{
+	int	i;
+
+	i = 1;
+	while (i <= philos_nbr)
+	{
+		pthread_join(philo_thread[i - 1], NULL);
+		i++;
+	}
+}
+
+void	*philo_thread_func(void *p)
+{
+	t_philo_data	*philo;
+
+	philo = (t_philo_data *)p;
+	if ((*philo).index % 2 == 1)
+		usleep(10000);
+	while (1)
+		if (philo_routine(philo))
+			break ;
+	return (NULL);
+}
+
+int	init_threads(t_data *data, t_philo_list *fork_table,
+		pthread_t *philo_thread, t_philo_data *philo_data)
+{
+	struct timeval	ct;
+	int				i;
+
+	i = 0;
+	gettimeofday(&ct, NULL);
+	data->start_timestamp = get_time_stamp(ct);
+	while (++i <= data->philos_nbr)
+	{
+		philo_data[i - 1].fork_table = fork_table;
+		philo_data[i - 1].data = data;
+		philo_data[i - 1].index = i;
+		philo_data[i - 1].nbr_of_eat = 0;
+		philo_data[i - 1].last_eat_time = get_time_stamp(ct);
+		if (pthread_create(&philo_thread[i - 1], NULL, philo_thread_func,
+				&philo_data[i - 1]) != 0)
+		{
+			pthread_mutex_lock(&data->lock_dead);
+			data->is_dead = 1;
+			pthread_mutex_unlock(&data->lock_dead);
+			thread_error_join(philo_thread, i);
+			return (printf("Error while initializing philo %d\n", i), 1);
+		}
+	}
+	return (0);
+}
+
 int	main(int argc, char **argv)
 {
 	t_data				data;

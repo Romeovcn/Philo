@@ -45,11 +45,11 @@ void	*death_check_func(void *p)
 		die_time = philo_data->last_eat_time + philo_data->data->time_to_die;
 		sem_post(philo_data->data->sem_last_eat_time);
 		gettimeofday(&ct, NULL);
-		current_time = ((ct.tv_sec * 1000000 + ct.tv_usec) / 1000);
+		current_time = get_time_stamp(ct);
 		if (die_time < current_time)
 		{
 			sem_wait(philo_data->data->sem_pause);
-			printf("%ld %d died.\n", current_time
+			printf("%ld %d died\n", current_time
 				- philo_data->data->start_timestamp, philo_data->index);
 			sem_post(philo_data->data->sem_kill_all);
 			return (NULL);

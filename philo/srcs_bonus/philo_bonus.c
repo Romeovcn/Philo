@@ -12,6 +12,11 @@
 
 #include "philo_bonus.h"
 
+long	get_time_stamp(struct timeval current_time)
+{
+	return ((current_time.tv_sec * 1000000 + current_time.tv_usec) / 1000);
+}
+
 int	child_func(t_data data, int index)
 {
 	struct timeval	ct;
@@ -22,14 +27,14 @@ int	child_func(t_data data, int index)
 	gettimeofday(&ct, NULL);
 	philo_data.data = &data;
 	philo_data.index = index;
-	philo_data.last_eat_time = ((ct.tv_sec * 1000000 + ct.tv_usec) / 1000);
+	philo_data.last_eat_time = get_time_stamp(ct);
 	eating_counter = 0;
 	if (pthread_create(&death_check, NULL, death_check_func, &philo_data) == 0)
 		pthread_detach(death_check);
 	if (philo_data.index % 2 == 1)
-		usleep((data.time_to_eat / 2) * 1000);
+		usleep(10000);
 	while (1)
-		routine(&philo_data, &eating_counter);
+		philo_routine(&philo_data, &eating_counter);
 }
 
 int	create_childs(t_data *data)
@@ -39,7 +44,7 @@ int	create_childs(t_data *data)
 
 	i = 0;
 	gettimeofday(&ct, NULL);
-	data->start_timestamp = (ct.tv_sec * 1000000 + ct.tv_usec) / 1000;
+	data->start_timestamp = get_time_stamp(ct);
 	while (i < data->philos_nbr)
 	{
 		data->pid[i] = fork();

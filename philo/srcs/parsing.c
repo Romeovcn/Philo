@@ -45,7 +45,7 @@ int	is_not_numeric(char *s)
 {
 	while (*s)
 	{
-		if (*s > '9' || *s < '0')
+		if ((*s > '9' || *s < '0') && *s != '-')
 			return (1);
 		s++;
 	}
@@ -75,11 +75,10 @@ int	check_error(int argc, char **argv)
 	i = 1;
 	while (argv[i])
 	{
-		if (ft_atoi(argv[i]) < 0)
-			return (printf("Arguments must be positive.\n"), 1);
 		if (is_not_numeric(argv[i]))
-			return (printf("Arguments must contains only numerics values.\n"),
-				1);
+			return (printf("Arguments must contains only numeric values.\n"), 1);
+		if (argv[i][0] == '-')
+			return (printf("Arguments must be positive.\n"), 1);
 		if (is_more_10_char(argv[i]) || ft_atoi(argv[i]) > 2147483647)
 			return (printf("Arguments must be smaller than 2147483648.\n"), 1);
 		i++;
