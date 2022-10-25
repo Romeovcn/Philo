@@ -78,7 +78,8 @@ void	philo_sleep(t_philo_data *philo_data)
 	sem_wait(philo_data->data->sem_pause);
 	printf("%ld %d is thinking\n", time_stamp, philo_data->index);
 	sem_post(philo_data->data->sem_pause);
-	if (philo_data->data->time_to_sleep == 0)
+	if (philo_data->data->time_to_sleep == 0
+		|| philo_data->data->philos_nbr % 2 == 1)
 		usleep(1000);
 }
 
